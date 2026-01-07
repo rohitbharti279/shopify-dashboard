@@ -13,8 +13,9 @@ export const getShopInfo = async (req, res, next) => {
 
 export const getProducts = async (req, res, next) => {
   try {
-    const { first = 20, after = null } = req.query;
-    const products = await shopifyService.getProducts(parseInt(first), after);
+    const { first = 20, after = null, search = '', type = '', vendor = '', tag = '', minPrice = '', maxPrice = '' } = req.query;
+    const filters = { search, type, vendor, tag, minPrice, maxPrice };
+    const products = await shopifyService.getProducts(parseInt(first), after, filters);
     console.log('BACKEND PRODUCTS DATA:', JSON.stringify(products, null, 2));
     res.json(products);
   } catch (error) {

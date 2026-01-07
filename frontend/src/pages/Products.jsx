@@ -12,12 +12,24 @@ import { toast } from 'react-hot-toast';
 function Products() {
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
   const [searchTerm, setSearchTerm] = useState('');
+  const [type, setType] = useState('');
+  const [vendor, setVendor] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [cursor, setCursor] = useState(null);
   const [prevCursors, setPrevCursors] = useState([]); // stack for previous pages
 
   const { data: productsData, isLoading, error } = useQuery({
-    queryKey: ['products', cursor],
-    queryFn: () => shopifyApi.getProducts({ first: 20, after: cursor }),
+    queryKey: ['products', cursor, searchTerm, type, vendor, minPrice, maxPrice],
+    queryFn: () => shopifyApi.getProducts({
+      first: 20,
+      after: cursor,
+      search: searchTerm,
+      type,
+      vendor,
+      minPrice,
+      maxPrice
+    }),
     keepPreviousData: true,
   });
 
@@ -112,13 +124,49 @@ function Products() {
           />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 mt-2 md:mt-0">
-          <button
-            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shopify-green"
-            aria-label="Filter products"
+          <select
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-shopify-green focus:outline-none"
+            value={type}
+            onChange={e => setType(e.target.value)}
+            aria-label="Filter by type"
           >
-            <Filter className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden xs:inline">Filter</span>
-          </button>
+            <option value="">All Types</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Hoodie">Hoodie</option>
+            <option value="Accessory">Accessory</option>
+            <option value="Mug">Mug</option>
+            {/* Add more types as needed */}
+          </select>
+          <select
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-shopify-green focus:outline-none"
+            value={vendor}
+            onChange={e => setVendor(e.target.value)}
+            aria-label="Filter by vendor"
+          >
+            <option value="">All Vendors</option>
+            <option value="Shopify">Shopify</option>
+            <option value="Printful">Printful</option>
+            <option value="Custom">Custom</option>
+            {/* Add more vendors as needed */}
+          </select>
+          <input
+            type="number"
+            min="0"
+            className="px-3 py-2 border border-gray-300 rounded-lg w-24 text-sm focus:ring-2 focus:ring-shopify-green focus:outline-none"
+            placeholder="Min $"
+            aria-label="Min price"
+            value={minPrice}
+            onChange={e => setMinPrice(e.target.value)}
+          />
+          <input
+            type="number"
+            min="0"
+            className="px-3 py-2 border border-gray-300 rounded-lg w-24 text-sm focus:ring-2 focus:ring-shopify-green focus:outline-none"
+            placeholder="Max $"
+            aria-label="Max price"
+            value={maxPrice}
+            onChange={e => setMaxPrice(e.target.value)}
+          />
           <div className="flex border border-gray-300 rounded-lg overflow-hidden w-full sm:w-auto">
             <button
               className={`flex-1 px-4 py-2 ${viewMode === 'table' ? 'bg-gray-100' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shopify-green text-sm md:text-base`}

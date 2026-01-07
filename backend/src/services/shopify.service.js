@@ -87,11 +87,21 @@
     return products;
   }
 
-  async getProducts(first = 250) {
+  async getProducts(first = 250, after = null, filters = {}) {
     try {
+      // Build Shopify search query string
+      let queryStr = '';
+      if (filters.search) queryStr += `title:*${filters.search}* `;
+      if (filters.type) queryStr += `product_type:${filters.type} `;
+      if (filters.vendor) queryStr += `vendor:${filters.vendor} `;
+      if (filters.tag) queryStr += `tag:${filters.tag} `;
+      if (filters.minPrice) queryStr += `variants.price:>='${filters.minPrice}' `;
+      if (filters.maxPrice) queryStr += `variants.price:<='${filters.maxPrice}' `;
+      queryStr = queryStr.trim();
+
       const query = `
-        query getProducts($first: Int!, $after: String) {
-          products(first: $first, after: $after) {
+        query getProducts($first: Int!, $after: String, $query: String) {
+          products(first: $first, after: $after, query: $query) {
             edges {
               node {
                 id
@@ -146,8 +156,9 @@
       let hasNextPage = true;
       let after = null;
 
+
       while (hasNextPage) {
-        const variables = { first, after };
+        const variables = { first, after, query: queryStr || undefined };
 
         const response = await storefrontGraphQLClient.post('', {
           query,
