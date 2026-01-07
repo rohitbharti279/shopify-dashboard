@@ -40,6 +40,7 @@ api.interceptors.response.use(
 export const shopifyApi = {
   // Products
   getProducts: (params) => api.get('/shopify/products', { params }),
+  getProduct: (handle) => api.get(`/shopify/products/${handle}`),
   
 };
 

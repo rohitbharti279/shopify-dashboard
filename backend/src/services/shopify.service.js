@@ -1,6 +1,91 @@
-import { storefrontGraphQLClient } from '../config/shopify.config.js';
 
-export class ShopifyService {
+  import { storefrontGraphQLClient } from '../config/shopify.config.js';
+
+  export class ShopifyService {
+  async getProductByHandle(handle) {
+    const query = `
+      query getProduct($handle: String!) {
+        productByHandle(handle: $handle) {
+          id
+          title
+          handle
+          description
+          productType
+          vendor
+          createdAt
+          updatedAt
+          tags
+          totalInventory
+          priceRange {
+            minVariantPrice { amount currencyCode }
+            maxVariantPrice { amount currencyCode }
+          }
+          variants(first: 50) {
+            edges {
+              node {
+                id
+                title
+                sku
+                price { amount currencyCode }
+                availableForSale
+              }
+            }
+          }
+          images(first: 50) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          options {
+            name
+            values
+          }
+        }
+      }
+    `;
+    const variables = { handle };
+    const response = await storefrontGraphQLClient.post('', { query, variables });
+    if (response.data.errors) {
+      throw new Error('Shopify GraphQL error: ' + JSON.stringify(response.data.errors));
+    }
+    const product = response.data.data.productByHandle;
+    if (!product) throw new Error('Product not found');
+    return {
+      ...product,
+      images: product.images.edges.map(imgEdge => imgEdge.node),
+      variants: product.variants?.edges?.map(v => v.node) || [],
+    };
+  }
+
+  async getSimilarProducts(productType, excludeHandle, first = 4) {
+    const query = `
+      query getProducts($first: Int!, $productType: String!) {
+        products(first: $first, query: $productType) {
+          edges {
+            node {
+              id
+              title
+              handle
+              productType
+              featuredImage: images(first: 1) { edges { node { url altText } } }
+            }
+          }
+        }
+      }
+    `;
+    const variables = { first: first + 1, productType: `product_type:${productType}` };
+    const response = await storefrontGraphQLClient.post('', { query, variables });
+    if (response.data.errors) {
+      throw new Error('Shopify GraphQL error: ' + JSON.stringify(response.data.errors));
+    }
+    let products = response.data.data.products.edges.map(edge => edge.node);
+    // Exclude the current product
+    products = products.filter(p => p.handle !== excludeHandle).slice(0, first);
+    return products;
+  }
 
   async getProducts(first = 250) {
     try {

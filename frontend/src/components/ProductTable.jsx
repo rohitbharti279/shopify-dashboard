@@ -20,7 +20,7 @@ function ProductTable({ products }) {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {products.map((product) => {
-            const firstImage = product.featuredImage || product.images?.edges?.[0]?.node;
+            const firstImage = product.featuredImage || product.images?.[0];
             return (
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
@@ -42,7 +42,7 @@ function ProductTable({ products }) {
                 <td className="px-6 py-4 text-sm font-medium">
                   <div className="flex items-center space-x-2">
                     <Link
-                      to={`/products/${product.id.split('/').pop()}`}
+                      to={`/products/${product.handle}`}
                       className="text-gray-400 hover:text-shopify-green"
                       title="View"
                     >

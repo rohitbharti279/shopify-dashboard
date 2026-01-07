@@ -24,9 +24,11 @@ export const getProducts = async (req, res, next) => {
 
 export const getProduct = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const product = await shopifyService.getProductById(id);
-    res.json(product);
+    const { handle } = req.params;
+    const product = await shopifyService.getProductByHandle(handle);
+    // Also fetch similar products
+    const similar = await shopifyService.getSimilarProducts(product.productType, handle);
+    res.json({ product, similar });
   } catch (error) {
     next(error);
   }
