@@ -7,31 +7,33 @@ import Pagination from '../components/Pagination';
 import { shopifyApi } from '../services/api';
 
 function Products() {
-    // ...existing code...
-    // Place debug logs after all variables are initialized
-    // Debug logs to diagnose data issues
-    // Only log after isLoading and error are defined
-    // This should be placed after products, productsPageInfo are defined
-    // See below for correct placement
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
   const [searchTerm, setSearchTerm] = useState('');
-  const [pageInfo, setPageInfo] = useState({});
   const [cursor, setCursor] = useState(null);
+  const [prevCursors, setPrevCursors] = useState([]); // stack for previous pages
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products', cursor],
     queryFn: () => shopifyApi.getProducts({ first: 20, after: cursor }),
+    keepPreviousData: true,
   });
 
+  const productsPageInfo = productsData?.data?.pageInfo || {};
+
   const handleNextPage = () => {
-    if (productsData?.pageInfo?.hasNextPage) {
-      setCursor(productsData.pageInfo.endCursor);
+    if (productsPageInfo.hasNextPage) {
+      setPrevCursors(prev => [...prev, cursor]);
+      setCursor(productsPageInfo.endCursor);
     }
   };
 
   const handlePreviousPage = () => {
-    // Note: For previous page you need to implement a cursor stack
-    // or use the GraphQL `before` parameter
+    if (prevCursors.length > 0) {
+      const prev = [...prevCursors];
+      const lastCursor = prev.pop();
+      setPrevCursors(prev);
+      setCursor(lastCursor ?? null);
+    }
   };
 
   if (isLoading) {
@@ -51,8 +53,6 @@ function Products() {
   }
 
   const products = productsData?.data?.products || [];
-  // If you have pagination info, update this line accordingly
-  const productsPageInfo = productsData?.data?.pageInfo || {};
 
   // Debug logs to diagnose data issues
   if (!isLoading && !error) {
@@ -115,7 +115,7 @@ function Products() {
 
       <Pagination
         hasNextPage={productsPageInfo.hasNextPage}
-        hasPreviousPage={productsPageInfo.hasPreviousPage}
+        hasPreviousPage={prevCursors.length > 0}
         onNext={handleNextPage}
         onPrevious={handlePreviousPage}
       />
