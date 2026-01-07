@@ -12,10 +12,29 @@ export class ShopifyService {
                 id
                 title
                 handle
+                description
                 productType
+                vendor
                 createdAt
+                updatedAt
+                tags
                 totalInventory
-                images(first: 1) {
+                priceRange {
+                  minVariantPrice { amount currencyCode }
+                  maxVariantPrice { amount currencyCode }
+                }
+                variants(first: 50) {
+                  edges {
+                    node {
+                      id
+                      title
+                      sku
+                      price { amount currencyCode }
+                      availableForSale
+                    }
+                  }
+                }
+                images(first: 50) {
                   edges {
                     node {
                       url
@@ -23,6 +42,11 @@ export class ShopifyService {
                     }
                   }
                 }
+                options {
+                  name
+                  values
+                }
+                # metafields removed: Storefront API requires identifiers and does not support 'first' or 'edges' here
               }
             }
             pageInfo {
@@ -45,14 +69,29 @@ export class ShopifyService {
           variables
         });
 
+        // Debug: log raw response
+        console.log('Shopify raw response:', JSON.stringify(response.data, null, 2));
+
+        if (response.data.errors) {
+          throw new Error('Shopify GraphQL error: ' + JSON.stringify(response.data.errors));
+        }
+
+        if (!response.data.data || !response.data.data.products) {
+          throw new Error('Shopify response missing products: ' + JSON.stringify(response.data));
+        }
+
         const products = response.data.data.products;
 
         // Map products
         const mappedProducts = products.edges.map(edge => {
           const node = edge.node;
+          // featuredImage for table/grid, all images for detail
           return {
             ...node,
-            featuredImage: node.images.edges[0]?.node || null
+            featuredImage: node.images.edges[0]?.node || null,
+            images: node.images.edges.map(imgEdge => imgEdge.node),
+            variants: node.variants?.edges?.map(v => v.node) || [],
+            metafields: node.metafields?.edges?.map(m => m.node) || [],
           };
         });
 
