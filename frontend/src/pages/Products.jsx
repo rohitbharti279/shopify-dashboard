@@ -7,6 +7,12 @@ import Pagination from '../components/Pagination';
 import { shopifyApi } from '../services/api';
 
 function Products() {
+    // ...existing code...
+    // Place debug logs after all variables are initialized
+    // Debug logs to diagnose data issues
+    // Only log after isLoading and error are defined
+    // This should be placed after products, productsPageInfo are defined
+    // See below for correct placement
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
   const [searchTerm, setSearchTerm] = useState('');
   const [pageInfo, setPageInfo] = useState({});
@@ -44,7 +50,15 @@ function Products() {
     );
   }
 
-  const products = productsData?.data?.edges || [];
+  const products = productsData?.data?.products || [];
+  // If you have pagination info, update this line accordingly
+  const productsPageInfo = productsData?.data?.pageInfo || {};
+
+  // Debug logs to diagnose data issues
+  if (!isLoading && !error) {
+    console.log('productsData:', productsData);
+    console.log('products:', products);
+  }
 
   return (
     <div className="space-y-6">
@@ -100,8 +114,8 @@ function Products() {
       )}
 
       <Pagination
-        hasNextPage={productsData?.pageInfo?.hasNextPage}
-        hasPreviousPage={productsData?.pageInfo?.hasPreviousPage}
+        hasNextPage={productsPageInfo.hasNextPage}
+        hasPreviousPage={productsPageInfo.hasPreviousPage}
         onNext={handleNextPage}
         onPrevious={handlePreviousPage}
       />

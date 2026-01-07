@@ -25,9 +25,7 @@ function Dashboard() {
     );
   }
 
-  console.log('FRONTEND productsData:', productsData);
-  const products = productsData?.data?.edges || [];
-  console.log('FRONTEND products:', products);
+  const products = productsData?.data?.products || [];
 
   return (
     <div className="space-y-6">
