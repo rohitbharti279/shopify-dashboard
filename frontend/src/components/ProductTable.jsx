@@ -22,19 +22,26 @@ function ProductTable({ products }) {
           {products.map((product) => {
             const firstImage = product.featuredImage || product.images?.[0];
             return (
-              <tr key={product.id} className="hover:bg-gray-50">
+              <tr
+                key={product.id}
+                className="hover:bg-shopify-light cursor-pointer group transition"
+                tabIndex={0}
+                onClick={() => window.location.href = `/products/${product.handle}`}
+                onKeyDown={e => { if (e.key === 'Enter') window.location.href = `/products/${product.handle}`; }}
+                aria-label={`View details for ${product.title}`}
+              >
                 <td className="px-6 py-4">
                   {firstImage ? (
                     <img
                       src={firstImage.url}
                       alt={firstImage.altText || product.title}
-                      className="h-10 w-10 rounded-md object-cover"
+                      className="h-10 w-10 rounded-md object-cover border border-gray-200 group-hover:border-shopify-green transition"
                     />
                   ) : (
                     <span className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">No Image</span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{product.title}</td>
+                <td className="px-6 py-4 text-sm text-gray-900 group-hover:text-shopify-green transition font-semibold">{product.title}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">{product.handle}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">{product.productType || 'N/A'}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">{product.totalInventory ?? 'N/A'}</td>
@@ -43,8 +50,10 @@ function ProductTable({ products }) {
                   <div className="flex items-center space-x-2">
                     <Link
                       to={`/products/${product.handle}`}
-                      className="text-gray-400 hover:text-shopify-green"
+                      className="text-gray-400 hover:text-shopify-green focus:outline-none focus:ring-2 focus:ring-shopify-green rounded transition"
                       title="View"
+                      tabIndex={-1}
+                      onClick={e => e.stopPropagation()}
                     >
                       <Eye className="h-5 w-5" />
                     </Link>

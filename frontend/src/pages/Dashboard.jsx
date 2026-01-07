@@ -78,33 +78,36 @@ function Dashboard() {
 
       {/* Interesting: Newest Product */}
       {newestProduct && (
-        <div className="bg-white rounded-lg shadow p-4 border border-gray-100">
-          <h2 className="text-lg font-semibold mb-2">Newest Product</h2>
+        <a
+          href={`/products/${newestProduct.handle}`}
+          className="block bg-white rounded-lg shadow p-4 border border-gray-100 hover:shadow-lg hover:border-shopify-green transition group"
+        >
+          <h2 className="text-lg font-semibold mb-2 group-hover:text-shopify-green transition">Newest Product</h2>
           <div className="flex items-center gap-4">
             {newestProduct.featuredImage && (
               <img
                 src={newestProduct.featuredImage.url}
                 alt={newestProduct.featuredImage.altText || newestProduct.title}
-                className="h-16 w-16 object-cover rounded"
+                className="h-16 w-16 object-cover rounded border border-gray-200 group-hover:border-shopify-green transition"
               />
             )}
             <div>
-              <div className="font-bold text-gray-900">{newestProduct.title}</div>
+              <div className="font-bold text-gray-900 group-hover:text-shopify-green transition">{newestProduct.title}</div>
               <div className="text-xs text-gray-500">Type: {newestProduct.productType || 'N/A'}</div>
               <div className="text-xs text-gray-500">Inventory: {newestProduct.totalInventory ?? 'N/A'}</div>
               <div className="text-xs text-gray-500">Created: {new Date(newestProduct.createdAt).toLocaleDateString()}</div>
             </div>
           </div>
-        </div>
+        </a>
       )}
 
       {/* Recent Products */}
       <div>
         <h2 className="text-lg font-semibold mb-2">Recent Products</h2>
-        <RecentProducts products={recentProducts} />
+        <RecentProducts products={recentProducts} clickable />
         <a
           href="/products"
-          className="inline-block mt-4 px-4 py-2 bg-shopify-green text-white rounded hover:bg-green-700 text-sm font-medium"
+          className="inline-block mt-4 px-4 py-2 bg-shopify-green text-white rounded hover:bg-green-700 text-sm font-medium transition"
         >
           View All Products
         </a>
